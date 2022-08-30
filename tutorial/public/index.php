@@ -21,6 +21,7 @@ $loader->registerDirs(
     ]
 );
 
+
 $loader->register();
 
 // Create a DI
