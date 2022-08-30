@@ -5,7 +5,7 @@ use Phalcon\Loader;
 use Phalcon\Mvc\View;
 use Phalcon\Mvc\Application;
 use Phalcon\Url;
-
+use Phalcon\Db\Adapter\Pdo\Mysql;
 
 
 define('BASE_PATH', dirname(__DIR__));
@@ -19,10 +19,7 @@ $loader->registerDirs(
         APP_PATH . '/controllers/',
         APP_PATH . '/models/',
     ]
-);
-
-
-$loader->register();
+)->register();
 
 // Create a DI
 $container = new FactoryDefault();
@@ -47,15 +44,28 @@ $container->set(
     }
 );
 
-$application = new Application($container);
+$container->set(
+    'db',
+    function(){
+        return new Mysql(
+            [
+                'host'     => '127.0.0.1',
+                'username' => 'root',
+                'password' => '',
+                'dbname'   => 'fire_db',
+            ]
+            );
+    }
+);
 
+$application = new Application($container);
 try {
     // Handle the request
     $response = $application->handle(
         $_SERVER["REQUEST_URI"]
     );
-
     $response->send();
 } catch (\Exception $e) {
-    echo 'Exception: ', $e->getMessage();
+    echo $application->handle($_GET['_url'] ?? '/')->getContent();
+    //echo 'Exception: ', $e->getMessage();
 }
